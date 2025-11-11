@@ -36,9 +36,9 @@ public class GlobalExceptionHandler {
             CustomException exception
     ) {
         BaseResponse<Object> body = new BaseResponse<>();
-        body.setMessage(exception.getExceptionMessage());
+        body.setMessage(exception.getMessage());
         body.setStatus("F");
-        body.setError(exception.getData());
+        body.setError(exception.getErrors());
 
         return new ResponseEntity<>(body, HttpStatusCode.valueOf(exception.getStatusCode()));
     }

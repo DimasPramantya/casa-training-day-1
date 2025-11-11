@@ -6,18 +6,18 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class CustomException extends RuntimeException {
-    private final String exceptionMessage;
+    private final String message;
     private final int statusCode;
-    private final Object data;
+    private final Object errors;
 
-    public CustomException(String exceptionMessage, int statusCode, Object data) {
-        super(exceptionMessage);
-        this.exceptionMessage = exceptionMessage;
+    public CustomException(String message, int statusCode, Object errors) {
+        super(message);
+        this.message = message;
         this.statusCode = statusCode;
-        this.data = data;
+        this.errors = errors;
     }
 
-    public CustomException(String exceptionMessage, int statusCode) {
-        this(exceptionMessage, statusCode, null);
+    public CustomException(String message, int statusCode) {
+        this(message, statusCode, null);
     }
 }
