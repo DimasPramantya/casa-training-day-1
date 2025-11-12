@@ -20,6 +20,10 @@ public class UserService {
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    public CreateUserResDto createUser(CreateUserReqDto request) {
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Email already in use");
 
     public LoginResponse login(LoginRequest request){
         // Get email
@@ -29,8 +33,22 @@ public class UserService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
+        UUID userId = UUID.randomUUID();
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        User user = User.builder().userId(userId)
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(encodedPassword).build();
         // Check password
 
+        User savedUser = userRepository.save(user);
+
+        return new CreateUserResDto(
+                savedUser.getUserId().toString(),
+                savedUser.getName(),
+                savedUser.getEmail()
+        );
+    }
         boolean isMatch = passwordEncoder.matches(request.getPassword(), user.get().getPassword());
         if (!isMatch){
             throw new IllegalArgumentException("Invalid email or password");
