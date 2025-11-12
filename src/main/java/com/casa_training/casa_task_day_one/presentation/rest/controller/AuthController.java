@@ -1,10 +1,10 @@
 package com.casa_training.casa_task_day_one.presentation.rest.controller;
 
-import com.casa_training.casa_task_day_one.presentation.rest.dto.CreateUserRequest;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.CreateUserResponse;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.LoginRequest;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.LoginResponse;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.req.CreateUserReqDto;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.req.LoginRequest;
 import com.casa_training.casa_task_day_one.presentation.rest.dto.res.BaseResponse;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.res.CreateUserResDto;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.res.LoginResponse;
 import com.casa_training.casa_task_day_one.usecase.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +30,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    private ResponseEntity<BaseResponse<CreateUserResponse>> register(
-            @RequestBody CreateUserRequest createUserRequest
+    private ResponseEntity<BaseResponse<CreateUserResDto>> register(
+            @RequestBody CreateUserReqDto createUserRequest
     ){
-        CreateUserResponse result = userService.createUser(createUserRequest);
-        BaseResponse<CreateUserResponse> response = new BaseResponse<>();
+        CreateUserResDto result = userService.register(createUserRequest);
+        BaseResponse<CreateUserResDto> response = new BaseResponse<>();
         response.setData(result);
         return ResponseEntity.ok(response);
     }

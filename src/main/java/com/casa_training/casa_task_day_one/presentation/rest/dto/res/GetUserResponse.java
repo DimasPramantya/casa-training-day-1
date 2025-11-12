@@ -1,10 +1,9 @@
-package com.casa_training.casa_task_day_one.presentation.rest.dto;
+package com.casa_training.casa_task_day_one.presentation.rest.dto.res;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
 public class GetUserResponse {
-
     @JsonProperty("name")
     @Getter
     @Setter

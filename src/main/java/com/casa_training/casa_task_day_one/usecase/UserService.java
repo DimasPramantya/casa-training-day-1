@@ -2,7 +2,11 @@ package com.casa_training.casa_task_day_one.usecase;
 import com.casa_training.casa_task_day_one.domain.Role;
 import com.casa_training.casa_task_day_one.domain.User;
 import com.casa_training.casa_task_day_one.helper.JwtHelper;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.*;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.req.CreateUserReqDto;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.req.LoginRequest;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.res.CreateUserResDto;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.res.GetUserResponse;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.res.LoginResponse;
 import com.casa_training.casa_task_day_one.presentation.rest.exception.CustomException;
 import com.casa_training.casa_task_day_one.repository.pgsql.RoleRepository;
 import com.casa_training.casa_task_day_one.repository.pgsql.UserRepository;
@@ -27,7 +31,7 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
-    public CreateUserResponse createUser(CreateUserRequest request) {
+    public CreateUserResDto register (CreateUserReqDto request) {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if(existingUser.isPresent()) {
             throw new IllegalArgumentException("Email already exists");
@@ -47,14 +51,14 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         User userDb = userRepository.save(user);
-        return new CreateUserResponse(
-            userDb.getName(), userDb.getEmail(), userDb.getUserId().toString()
+        return new CreateUserResDto(
+                userDb.getUserId().toString(), userDb.getName(), userDb.getEmail()
         );
     }
 
     public GetUserResponse getUser(UUID id){
         User user = userRepository.findByUserId(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new CustomException("User not found", HttpStatus.BAD_REQUEST.value()));
         return new GetUserResponse(
             user.getName(), user.getEmail(), user.getUserId().toString()
         );
