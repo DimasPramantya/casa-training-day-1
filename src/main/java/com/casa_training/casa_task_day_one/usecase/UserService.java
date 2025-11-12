@@ -9,10 +9,12 @@ import com.casa_training.casa_task_day_one.presentation.rest.dto.res.LoginRespon
 import com.casa_training.casa_task_day_one.repository.pgsql.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Service
 public class UserService {
 
     @Autowired
