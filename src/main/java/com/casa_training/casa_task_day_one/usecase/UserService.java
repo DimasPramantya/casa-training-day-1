@@ -15,10 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -56,11 +54,14 @@ public class UserService {
         );
     }
 
-    public GetUserResponse getUser(UUID id){
-        User user = userRepository.findByUserId(id)
+    public GetUserResponse getUser(String email){
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException("User not found", HttpStatus.BAD_REQUEST.value()));
+        List<String> roles = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
         return new GetUserResponse(
-            user.getName(), user.getEmail(), user.getUserId().toString()
+            user.getName(), user.getEmail(), user.getUserId().toString(), roles
         );
     }
 

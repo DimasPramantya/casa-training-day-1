@@ -1,26 +1,14 @@
 package com.casa_training.casa_task_day_one.presentation.rest.dto.res;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+import java.util.List;
+
+@Data
+@AllArgsConstructor
 public class GetUserResponse {
-    @JsonProperty("name")
-    @Getter
-    @Setter
     private String name;
-    @JsonProperty("email")
-    @Getter
-    @Setter
     private String email;
-    @JsonProperty("userId")
-    @Getter
-    @Setter
     private String userId;
-
-
-    public GetUserResponse(String name, String email, String userId) {
-        this.name = name;
-        this.email = email;
-        this.userId = userId;
-    }
+    private List<String> authorities;
 }
