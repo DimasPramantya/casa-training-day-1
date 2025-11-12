@@ -18,7 +18,6 @@ public class BookController {
     private BookService bookService;
 
     @GetMapping("/search")
-    //TODO RATE LIMIT + CIRCUIT BREAKER
     @RateLimiter(name = "bookApi")
     public ResponseEntity<BaseResponse<OpenLibrarySearchResDto>> searchBooks(@RequestParam("query") String query) {
         OpenLibrarySearchResDto result = bookService.searchBooks(query);
