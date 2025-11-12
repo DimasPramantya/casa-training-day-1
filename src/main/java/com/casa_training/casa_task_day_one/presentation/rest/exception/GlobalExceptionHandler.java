@@ -1,6 +1,7 @@
 package com.casa_training.casa_task_day_one.presentation.rest.exception;
 
 import com.casa_training.casa_task_day_one.presentation.rest.dto.res.BaseResponse;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -41,5 +42,15 @@ public class GlobalExceptionHandler {
         body.setError(exception.getErrors());
 
         return new ResponseEntity<>(body, HttpStatusCode.valueOf(exception.getStatusCode()));
+    }
+    @ExceptionHandler(RequestNotPermitted.class)
+    public ResponseEntity<BaseResponse<Object>> handleRateLimitException(
+            RequestNotPermitted exception
+    ) {
+        BaseResponse<Object> body = new BaseResponse<>();
+        body.setStatus("F");
+        body.setMessage("Too many requests, please try again later.");
+        body.setError("Too many requests");
+        return new ResponseEntity<>(body, HttpStatus.TOO_MANY_REQUESTS);
     }
 }

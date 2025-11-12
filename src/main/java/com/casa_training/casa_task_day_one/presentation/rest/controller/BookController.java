@@ -3,6 +3,7 @@ package com.casa_training.casa_task_day_one.presentation.rest.controller;
 import com.casa_training.casa_task_day_one.presentation.rest.dto.res.BaseResponse;
 import com.casa_training.casa_task_day_one.presentation.rest.dto.res.OpenLibrarySearchResDto;
 import com.casa_training.casa_task_day_one.usecase.BookService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +18,8 @@ public class BookController {
     private BookService bookService;
 
     @GetMapping("/search")
-
     //TODO RATE LIMIT + CIRCUIT BREAKER
+    @RateLimiter(name = "bookApi")
     public ResponseEntity<BaseResponse<OpenLibrarySearchResDto>> searchBooks(@RequestParam("query") String query) {
         OpenLibrarySearchResDto result = bookService.searchBooks(query);
 

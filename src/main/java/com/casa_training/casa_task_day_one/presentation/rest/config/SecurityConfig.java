@@ -22,7 +22,7 @@ public class SecurityConfig {
             .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             .authorizeHttpRequests(auth-> auth
                     .requestMatchers(PUBLIC_URLS).permitAll()
-                    .anyRequest().authenticated()
+                    .anyRequest().permitAll()
             );
         return http.build();
     }
