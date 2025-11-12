@@ -1,69 +1,81 @@
 package com.casa_training.casa_task_day_one.usecase;
-
+import com.casa_training.casa_task_day_one.domain.Role;
 import com.casa_training.casa_task_day_one.domain.User;
 import com.casa_training.casa_task_day_one.helper.JwtHelper;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.req.CreateUserReqDto;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.req.LoginRequest;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.res.CreateUserResDto;
-import com.casa_training.casa_task_day_one.presentation.rest.dto.res.LoginResponse;
+import com.casa_training.casa_task_day_one.presentation.rest.dto.*;
+import com.casa_training.casa_task_day_one.presentation.rest.exception.CustomException;
+import com.casa_training.casa_task_day_one.repository.pgsql.RoleRepository;
 import com.casa_training.casa_task_day_one.repository.pgsql.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class UserService {
-
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtHelper jwtHelper;
+    @Autowired
+    private RoleRepository roleRepository;
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    public CreateUserResDto createUser(CreateUserReqDto request) {
+    public CreateUserResponse createUser(CreateUserRequest request) {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
-        if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+        if(existingUser.isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
         }
-
-        UUID userId = UUID.randomUUID();
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
-        User user = User.builder().userId(userId)
-                .name(request.getName())
+        Role defaultRole = roleRepository.findByName("user")
+                .orElseThrow(() -> new CustomException(
+                    "Error: Default 'user' role not found.",
+                    HttpStatus.BAD_REQUEST.value()
+                ));
+        Set<Role> roles = new HashSet<>();
+        roles.add(defaultRole);
+        User user = User.builder()
+                .userId(UUID.randomUUID())
                 .email(request.getEmail())
-                .password(encodedPassword).build();
+                .name(request.getName())
+                .roles(roles)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+        User userDb = userRepository.save(user);
+        return new CreateUserResponse(
+            userDb.getName(), userDb.getEmail(), userDb.getUserId().toString()
+        );
+    }
 
-        User savedUser = userRepository.save(user);
-
-        return new CreateUserResDto(
-                savedUser.getUserId().toString(),
-                savedUser.getName(),
-                savedUser.getEmail()
+    public GetUserResponse getUser(UUID id){
+        User user = userRepository.findByUserId(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new GetUserResponse(
+            user.getName(), user.getEmail(), user.getUserId().toString()
         );
     }
 
     public LoginResponse login(LoginRequest request){
-        // Get email
         Optional<User> user = userRepository.findByEmail(request.getEmail());
-        if (user.isEmpty()){
-            throw new IllegalArgumentException("Invalid email or password");
+        if(user.isEmpty()) {
+            throw new CustomException(
+                "Wrong email or password",
+                HttpStatus.BAD_REQUEST.value()
+            );
         }
-
-        // Check password
-        boolean isMatch = passwordEncoder.matches(request.getPassword(), user.get().getPassword());
-        if (!isMatch){
-        throw new IllegalArgumentException("Invalid email or password");
+        if(!passwordEncoder.matches(request.getPassword(), user.get().getPassword())) {
+            throw new CustomException(
+                "Wrong email or password",
+                HttpStatus.BAD_REQUEST.value()
+            );
         }
-
-        // Generate token
-        String token = jwtHelper.generateToken(user.get());
-
-        // Return Token
-        return new LoginResponse(token);
+        return new LoginResponse(
+                jwtHelper.generateToken(user.get())
+        );
     }
 }

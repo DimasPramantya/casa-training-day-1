@@ -6,13 +6,17 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JwtHelper {
@@ -52,6 +56,10 @@ public class JwtHelper {
             User userDetails
     ) {
         Map<String, Object> extraClaims = new HashMap<>();
+        List<String> roleNames = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        extraClaims.put("authorities", roleNames);
         extraClaims.put("userId", userDetails.getUserId());
         extraClaims.put("name", userDetails.getName());
         extraClaims.put("email", userDetails.getEmail());
@@ -68,10 +76,9 @@ public class JwtHelper {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Method to validate the token
-    public boolean isTokenValid(String token, User userDetails) {
-        final String email = extractSubject(token);
-        return (email.equals(userDetails.getEmail()) && !isTokenExpired(token));
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractSubject(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }
 
